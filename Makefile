@@ -1,5 +1,5 @@
 up:
-	export WWWGROUP=$$(id -g) WWWUSER=$$(id -u) && docker-compose up
+	docker-compose up
 migrate-fresh-seed:
 	./backend/vendor/bin/sail artisan migrate:fresh --seed --force
 down:
@@ -12,7 +12,7 @@ composer-install:
 		   laravelsail/php84-composer:latest \
 		   composer install --ignore-platform-reqs
 build:
-	export WWWGROUP=$$(id -g) WWWUSER=$$(id -u) && docker-compose up --build
+	docker-compose up --build
 clone-http:
 	git clone https://github.com/Kouameanaset/Sheet-Happens-Api.git backend
 	git clone https://github.com/Kouameanaset/Sheet-Happens-Frontend.git frontend
