@@ -1,10 +1,10 @@
 up:
-	docker-compose up
+	docker compose up
 migrate-fresh-seed:
-	./backend/vendor/bin/sail artisan migrate:fresh --seed --force
+	docker compose exec api php artisan migrate:fresh --seed --force
 down:
 	docker compose down
-composer-install:
+# composer-install: \
 	docker run --rm \
 		   -u "$(id -u):$(id -g)" \
 		   -v "./backend/:/var/www/html" \
@@ -19,3 +19,8 @@ clone-http:
 clone-ssh:
 	git clone git@github.com:Kouameanaset/Sheet-Happens-Api.git backend
 	git clone git@github.com:Kouameanaset/Sheet-Happens-Frontend.git frontend
+php:
+	docker compose exec api php $(filter-out $@, $(MAKECMDGOALS))
+
+%:
+	@:

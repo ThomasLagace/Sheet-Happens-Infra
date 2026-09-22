@@ -9,7 +9,7 @@ services:
             - ./frontend:/app
             - /app/node_modules
         healthcheck:
-            test: ["CMD-SHELL", "wget -q --spider http://localhost:5173 || exit 1"]
+            test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
             interval: 5s
             timeout: 5s
             retries: 10
@@ -26,30 +26,31 @@ services:
         depends_on:
             frontend:
                 condition: service_healthy
-            laravel.test:
+            api:
                 condition: service_started
         networks:
             - sail
 
-    laravel.test:
+    api:
         build:
-            context: './backend/vendor/laravel/sail/runtimes/8.5'
-            dockerfile: Dockerfile
+            context: './backend'
+            dockerfile: '../docker/api/Dockerfile'
             args:
+                WWWUSER: '${WWWUSER:-1000}'
                 WWWGROUP: '${WWWGROUP:-1000}'
-        image: 'sail-8.5/app'
+                INSTALL_XDEBUG: '${INSTALL_XDEBUG:-false}'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         environment:
             WWWUSER: '${WWWUSER:-1000}'
-            LARAVEL_SAIL: 1
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - './backend/:/var/www/html/'
+            - 'vendor_cache:/var/www/html/vendor'
         healthcheck:
-            test: ["CMD-SHELL", "curl -fsS http://localhost/ >/dev/null || exit 1"]
+            test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1"]
             interval: 5s
             timeout: 5s
             retries: 10
@@ -57,8 +58,11 @@ services:
         networks:
             - sail
         depends_on:
-            - mysql
-            - mailpit
+            mailpit:
+                condition: service_started
+            mysql:
+                condition: service_healthy
+
     mysql:
         image: 'mysql:8.4'
         ports:
@@ -73,7 +77,6 @@ services:
             MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS:-}'
         volumes:
             - 'sail-mysql:/var/lib/mysql'
-            - './backend/vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
             - sail
         healthcheck:
@@ -84,6 +87,7 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+
     mailpit:
         image: 'axllent/mailpit:latest'
         ports:
@@ -91,9 +95,26 @@ services:
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
             - sail
+
+    phpmyadmin:
+        image: phpmyadmin:latest
+        ports:
+            - '8080:80'
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+        depends_on:
+            - mysql
+        networks:
+            - sail
+
 networks:
     sail:
         driver: bridge
+
 volumes:
     sail-mysql:
+        driver: local
+    vendor_cache:
         driver: local
