@@ -1,5 +1,5 @@
 up:
-	docker compose up
+	docker compose up -d
 migrate-fresh-seed:
 	docker compose exec api php artisan migrate:fresh --seed --force
 down:

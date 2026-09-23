@@ -27,7 +27,7 @@ services:
             frontend:
                 condition: service_healthy
             api:
-                condition: service_started
+                condition: service_healthy
         networks:
             - sail
 
@@ -41,14 +41,24 @@ services:
                 INSTALL_XDEBUG: '${INSTALL_XDEBUG:-false}'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
+        env_file:
+            - .env
         environment:
             WWWUSER: '${WWWUSER:-1000}'
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            APP_KEY: '${APP_KEY:-}'
+            APP_ENV: '${APP_ENV:-production}'
+            APP_DEBUG: '${APP_DEBUG:-false}'
+            DB_CONNECTION: '${DB_CONNECTION:-mysql}'
+            DB_HOST: '${DB_HOST:-mysql}'
+            DB_PORT: '${DB_PORT:-3306}'
+            DB_DATABASE: '${DB_DATABASE:-laravel}'
+            DB_USERNAME: '${DB_USERNAME:-sail}'
+            DB_PASSWORD: '${DB_PASSWORD:-}'
         volumes:
             - './backend/:/var/www/html/'
-            - 'vendor_cache:/var/www/html/vendor'
         healthcheck:
             test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1"]
             interval: 5s
@@ -115,6 +125,4 @@ networks:
 
 volumes:
     sail-mysql:
-        driver: local
-    vendor_cache:
         driver: local

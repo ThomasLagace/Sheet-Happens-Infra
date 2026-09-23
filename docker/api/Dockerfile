@@ -4,9 +4,15 @@ WORKDIR /app
 
 COPY composer.json composer.lock ./
 
-RUN composer install --no-scripts --no-interaction --no-progress --prefer-dist --optimize-autoloader
+RUN composer install --no-scripts --no-interaction --no-progress --prefer-dist --optimize-autoloader --no-dev
 
 FROM php:8.5-fpm
+
+# Production-safe image defaults. .env.example is a dev template and is not
+# copied on boot. Infra overrides these with environment variables.
+ARG APP_ENV=production
+ENV APP_ENV=${APP_ENV}
+ENV APP_DEBUG=false
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
@@ -40,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN { \
     echo 'pm.status_path = /status'; \
     echo 'ping.path = /ping'; \
+    echo 'clear_env = no'; \
 } >> /usr/local/etc/php-fpm.d/www.conf
 
 RUN { \
@@ -55,13 +62,14 @@ RUN groupmod -g $WWWGROUP www-data && usermod -u $WWWUSER -g $WWWGROUP www-data
 
 WORKDIR /var/www/html
 
-COPY --from=vendor /app/vendor ./vendor
-COPY --from=vendor /usr/bin/composer /usr/bin/composer
-
 COPY . .
-
+COPY --from=vendor /app/vendor ./vendor
 COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh \
+    && rm -f bootstrap/cache/*.php \
+    && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && php artisan package:discover --ansi --no-interaction \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -89,3 +89,13 @@ The intended runtime behavior is:
 - Use `/api` for Laravel API traffic and `/` for the Vite + React frontend.
 
 This stack is designed to run as a minimal, local infrastructure setup where the reverse proxy is the central traffic router and the backend remains API-focused.
+
+## Container bootstrap notes
+
+The Laravel API image (`docker/api/Dockerfile`) uses `backend/entrypoint.sh` as its entrypoint. `backend/compose.yaml` is Laravel Sail and does not run that script; this repository’s `docker-compose.yml` does.
+
+`.env` is excluded from the image on purpose. `APP_KEY` and the database settings are injected at runtime by Compose (`env_file` plus `environment`) or by the Infra platform’s secrets. php-fpm is configured with `clear_env = no` so those variables reach the workers. An empty `APP_KEY=` or `APP_KEY=""` is treated as missing. The script never prints the key. In `production` it refuses to generate one, because a new key on each deploy would invalidate Sanctum sessions. A key is generated only for `local`, `development`, or `testing` when both the environment and `.env` lack one. `.env.example` stays a dev template (`APP_ENV=local`, `APP_DEBUG=true`); the image defaults are `APP_ENV=production` and `APP_DEBUG=false`, and the entrypoint does not copy that example into a production container.
+
+The script runs with `set -euo pipefail`, waits until MySQL accepts connections, then runs `php artisan migrate --force`. `depends_on` with `service_healthy` is also set on the API service. Running migrations from every replica at once can race; a separate migration job or `migrate --isolated` is the follow-up, not the current behavior.
+
+PHP dependencies are installed in the image build (`composer install --no-dev`), not on container start. Local Compose bind-mounts `backend/`, including the `vendor/` directory produced by `make composer-install`, so the running app matches that install.

@@ -33,3 +33,11 @@ Les variables importantes sont :
 - `SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,laravel.test` dans le backend `.env`
 
 Sans ces valeurs, les cookies de session Sanctum ne sont pas acceptés et l’authentification via Laravel échoue.
+
+### Script de bootstrap du conteneur
+
+`docker/api/Dockerfile` démarre le backend avec `backend/entrypoint.sh`. Le `compose.yaml` Sail du dépôt API ne l’utilise pas : seul le dépôt API s’en sert.
+
+`.env` est exclu de l’image. Ce n’est pas un oubli : la clé ne doit pas être copiée dans les couches Docker. Compose injecte `APP_KEY` et les variables `DB_*` depuis le `.env` de ce dépôt (celui copié depuis `.env.development`). En déploiement, l’Infra fournit la même clé par variable d’environnement ou secret. php-fpm a `clear_env = no`, donc les workers PHP voient ces variables. Le script n’écrit jamais la clé dans les logs. En production, une clé absente arrête le conteneur au lieu d’en générer une nouvelle, ce qui déconnecterait toutes les sessions Sanctum. `.env.example` reste un modèle de dev ; l’image force `APP_DEBUG=false` tant que l’Infra ne surcharge pas cette variable.
+
+Le script utilise `set -euo pipefail`, attend MySQL, puis lance `php artisan migrate --force` avant `php-fpm`. Les dépendances Composer sont installées au build de l’image (`--no-dev`), pas au démarrage. En local, le volume monte `backend/vendor` tel que `make composer-install` l’a produit.
