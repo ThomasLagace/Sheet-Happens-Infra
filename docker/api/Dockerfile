@@ -64,6 +64,7 @@ WORKDIR /var/www/html
 
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
+COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
 COPY entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh \

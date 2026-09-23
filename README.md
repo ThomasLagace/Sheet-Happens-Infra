@@ -17,8 +17,7 @@ Avoir la commande `make` et `docker-compose` d'installées.
 2. Pour rouler ce dépôt il faut utiliser `make clone-http` ou
    `make clone-ssh`, sur windows utiliser les scripts `./clone-http.ps1`
    et `./clone-ssh.ps1`.
-3. Exécuter la commande `make composer-install`
-4. Exécuter la commande `make up`
+3. Exécuter `make up` ou `docker compose up -d`. Au premier démarrage, les conteneurs installent les dépendances Composer et npm si elles sont absentes. Un démarrage suivant réutilise `backend/vendor` et le volume `frontend-node-modules`.
 
 ### Authentification Laravel Sanctum
 
@@ -40,4 +39,4 @@ Sans ces valeurs, les cookies de session Sanctum ne sont pas acceptés et l’au
 
 `.env` est exclu de l’image. Ce n’est pas un oubli : la clé ne doit pas être copiée dans les couches Docker. Compose injecte `APP_KEY` et les variables `DB_*` depuis le `.env` de ce dépôt (celui copié depuis `.env.development`). En déploiement, l’Infra fournit la même clé par variable d’environnement ou secret. php-fpm a `clear_env = no`, donc les workers PHP voient ces variables. Le script n’écrit jamais la clé dans les logs. En production, une clé absente arrête le conteneur au lieu d’en générer une nouvelle, ce qui déconnecterait toutes les sessions Sanctum. `.env.example` reste un modèle de dev ; l’image force `APP_DEBUG=false` tant que l’Infra ne surcharge pas cette variable.
 
-Le script utilise `set -euo pipefail`, attend MySQL, puis lance `php artisan migrate --force` avant `php-fpm`. Les dépendances Composer sont installées au build de l’image (`--no-dev`), pas au démarrage. En local, le volume monte `backend/vendor` tel que `make composer-install` l’a produit.
+Le script utilise `set -euo pipefail`, attend MySQL, puis lance `php artisan migrate --force` avant `php-fpm`. L’image installe toujours Composer au build (`--no-dev`) pour un conteneur sans montage du code. En local, le montage de `backend/` masque ce `vendor` : `docker/api/bootstrap.sh` lance `composer install` seulement si `vendor/autoload.php` est absent, puis exécute `entrypoint.sh`. Le frontend fait de même avec npm quand Vite n’est pas chargeable dans le conteneur.

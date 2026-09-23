@@ -16,12 +16,10 @@ The infrastructure is expected to be started in this exact order:
 1. `make clone-http`
    - Clones the backend repository into `backend/`.
    - Clones the frontend repository into `frontend/`.
-2. `make composer-install`
-   - Installs PHP dependencies for the Laravel backend using the Laravel Sail Composer image.
-3. `make up`
+2. `make up` (or `docker compose up -d`)
    - Starts the Docker services defined in `docker-compose.yml`.
 
-This order matters because the backend container expects the application code and Composer dependencies to already be present before the stack is brought up.
+`docker compose up -d` installs dependencies itself on first boot. The API bind-mounts `backend/`, which hides the `vendor` tree baked into the image, so `docker/api/bootstrap.sh` runs `composer install` only when `vendor/autoload.php` is missing and then execs `backend/entrypoint.sh`. Local, development, and testing environments install dev dependencies; production installs with `--no-dev`. An existing Composer install is left as-is — there is no `vendor` volume, because that previously hid a local install with the image's production tree. The frontend keeps `node_modules` in the `frontend-node-modules` volume and `docker/frontend/entrypoint.sh` runs `npm ci` only when Vite cannot be loaded in the container. Later boots skip both installs.
 
 ## Container traffic flow
 
@@ -83,8 +81,7 @@ The intended runtime behavior is:
 - Ensure `make` is installed.
 - Ensure Docker is running.
 - Run `make clone-http`.
-- Run `make composer-install`.
-- Run `make up`.
+- Run `make up` or `docker compose up -d`. Composer and npm dependencies are installed on first boot when they are missing.
 - Access the project through the Nginx reverse proxy on port `80`.
 - Use `/api` for Laravel API traffic and `/` for the Vite + React frontend.
 
@@ -98,4 +95,4 @@ The Laravel API image (`docker/api/Dockerfile`) uses `backend/entrypoint.sh` as 
 
 The script runs with `set -euo pipefail`, waits until MySQL accepts connections, then runs `php artisan migrate --force`. `depends_on` with `service_healthy` is also set on the API service. Running migrations from every replica at once can race; a separate migration job or `migrate --isolated` is the follow-up, not the current behavior.
 
-PHP dependencies are installed in the image build (`composer install --no-dev`), not on container start. Local Compose bind-mounts `backend/`, including the `vendor/` directory produced by `make composer-install`, so the running app matches that install.
+The API image still runs `composer install --no-dev` at build time so a container without the source bind mount can boot from the image alone. Local Compose bind-mounts `backend/` over that tree, so a checkout with no `vendor/` directory would otherwise start without dependencies. `docker/api/bootstrap.sh` fills that gap on container start and does not replace `vendor/` when `autoload.php` is already there. Composer is copied into the image; older images download it on first install. The frontend image still runs `npm i` at build time, and the named `node_modules` volume is what the dev server actually uses.
