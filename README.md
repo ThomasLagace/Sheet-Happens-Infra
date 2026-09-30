@@ -13,23 +13,24 @@ Avoir la commande `make` et `docker-compose` d'installées.
 
 ### Rouler le projet
 
-1. Copier le fichier `.env.development` dans `.env` (`cp .env.development .env`)
-2. Pour rouler ce dépôt il faut utiliser `make clone-http` ou
-   `make clone-ssh`, sur windows utiliser les scripts `./clone-http.ps1`
-   et `./clone-ssh.ps1`.
-3. Exécuter `make up` ou `docker compose up -d`. Au premier démarrage, les conteneurs installent les dépendances Composer et npm si elles sont absentes. Un démarrage suivant réutilise `backend/vendor` et le volume `frontend-node-modules`.
+1. Pour cloner les apps : `make clone-http` ou `make clone-ssh` (sur Windows : `./clone-http.ps1` / `./clone-ssh.ps1`).
+2. Démarrer en dev : `make up-dev` crée les `.env` manquants (infra depuis `.env.development`, `frontend/.env` et `backend/.env` depuis leurs `.env.example`) puis lance `docker compose up -d`. Sans préparation d’env : `make up` ou `docker compose up -d`. Au premier démarrage, les conteneurs installent Composer/npm si besoin ; un démarrage suivant réutilise `backend/vendor` et le volume `frontend-node-modules`.
+3. Vérifier la stack : `make smoke` (déjà démarrée) ou `make smoke-from-scratch` (down `-v`, rebuild, assert). Le script `scripts/assert-stack.ps1` contrôle santé Compose, seed ruleset, Sanctum, cache Nginx du catalogue, et `VITE_API_URL` dans le conteneur frontend.
+4. Créer seulement les `.env` sans démarrer : `make ensure-env` (ou `scripts/ensure-env.ps1` / `scripts/ensure-env.sh`).
 
 ### Authentification Laravel Sanctum
 
 Le frontend est une SPA qui doit d’abord récupérer le cookie CSRF via `/sanctum/csrf-cookie` avant d’envoyer une requête de connexion ou de session. Le proxy Nginx doit donc rediriger `/sanctum` vers le service Laravel, pas seulement `/api`.
 
-Le 404 sur `GET http://localhost/sanctum/csrf-cookie` venait du fait que Laravel n’enregistrait pas les routes Sanctum : il fallait appeler `Sanctum::routes()` dans un groupe `web`, puis laisser Nginx transmettre `/sanctum` au service Laravel.
+Le endpoint CSRF est enregistré par le service provider Sanctum (pas via des routes web Laravel ni un appel manuel à `Sanctum::routes()`). Nginx doit transmettre `/sanctum` au service API ; ensuite `php artisan route:list --name=csrf-cookie` confirme que la route existe.
+
+Sur Windows, préférer `127.0.0.1` à `localhost` pour l’origine navigateur : la résolution IPv6 de `localhost` peut retarder les requêtes d’environ 30 secondes avant le repli IPv4.
 
 Les variables importantes sont :
 
-- `VITE_API_URL=http://localhost` dans la racine `.env.development`
-- `FRONTEND_URLS=http://localhost,http://laravel.test` dans le backend `.env`
-- `SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,laravel.test` dans le backend `.env`
+- `VITE_API_URL=http://127.0.0.1` dans la racine `.env.development` (injecté dans le conteneur `frontend` par Compose)
+- `FRONTEND_URLS=http://127.0.0.1,http://localhost,http://localhost:5174,http://laravel.test` dans le backend `.env`
+- `SANCTUM_STATEFUL_DOMAINS=127.0.0.1,localhost,localhost:5174,laravel.test` dans le backend `.env`
 
 Sans ces valeurs, les cookies de session Sanctum ne sont pas acceptés et l’authentification via Laravel échoue.
 
@@ -39,4 +40,4 @@ Sans ces valeurs, les cookies de session Sanctum ne sont pas acceptés et l’au
 
 `.env` est exclu de l’image. Ce n’est pas un oubli : la clé ne doit pas être copiée dans les couches Docker. Compose injecte `APP_KEY` et les variables `DB_*` depuis le `.env` de ce dépôt (celui copié depuis `.env.development`). En déploiement, l’Infra fournit la même clé par variable d’environnement ou secret. php-fpm a `clear_env = no`, donc les workers PHP voient ces variables. Le script n’écrit jamais la clé dans les logs. En production, une clé absente arrête le conteneur au lieu d’en générer une nouvelle, ce qui déconnecterait toutes les sessions Sanctum. `.env.example` reste un modèle de dev ; l’image force `APP_DEBUG=false` tant que l’Infra ne surcharge pas cette variable.
 
-Le script utilise `set -euo pipefail`, attend MySQL, puis lance `php artisan migrate --force` avant `php-fpm`. L’image installe toujours Composer au build (`--no-dev`) pour un conteneur sans montage du code. En local, le montage de `backend/` masque ce `vendor` : `docker/api/bootstrap.sh` lance `composer install` seulement si `vendor/autoload.php` est absent, puis exécute `entrypoint.sh`. Le frontend fait de même avec npm quand Vite n’est pas chargeable dans le conteneur.
+Le script utilise `set -euo pipefail`, attend MySQL, puis lance `php artisan migrate --force` et `php artisan db:seed --force` avant `php-fpm` (le catalogue ruleset est idempotent via `SeedsOnce`). L’image installe toujours Composer au build (`--no-dev`) pour un conteneur sans montage du code. En local, le montage de `backend/` masque ce `vendor` : `docker/api/bootstrap.sh` lance `composer install` seulement si `vendor/autoload.php` est absent, puis exécute `entrypoint.sh`. Le frontend fait de même avec npm quand Vite n’est pas chargeable dans le conteneur.

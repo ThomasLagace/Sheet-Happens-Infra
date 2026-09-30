@@ -40,4 +40,7 @@ else
     rm -f bootstrap/cache/*.php
 fi
 
-exec /entrypoint.sh
+# Use the app tree entrypoint (bind-mounted in Compose), not the copy baked
+# at /entrypoint.sh in the image — otherwise local edits to backend/entrypoint.sh
+# never run.
+exec /var/www/html/entrypoint.sh
