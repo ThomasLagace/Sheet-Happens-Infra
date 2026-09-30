@@ -1,3 +1,14 @@
 /frontend/
 /backend/
 .env
+
+# Cursor: ignore personal/local tooling; keep shared agent links + cli permissions
+/.cursor/*
+!/.cursor/cli.json
+!/.cursor/rules/
+!/.cursor/rules/**
+!/.cursor/skills/
+!/.cursor/skills/**
+
+/node_modules/
+

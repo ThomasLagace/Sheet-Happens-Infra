@@ -1,0 +1,1 @@
+../../../agent/akinator/SKILL.md
