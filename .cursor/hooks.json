@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "hooks": {
+      "sessionStart": [
+        {
+          "command": "node .cursor/hooks/todo-point-session.js",
+          "timeout": 10
+        }
+      ],
+      "postToolUse": [
+        {
+          "command": "node .cursor/hooks/todo-point-commit.js",
+          "matcher": "TodoWrite",
+          "timeout": 60
+        }
+      ]
+    }
+  }
