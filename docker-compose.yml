@@ -3,8 +3,6 @@ services:
         build:
             context: ./frontend
             dockerfile: ../docker/frontend/Dockerfile
-        # Do not publish 5173 on the host: Vite HMR must go through Nginx :80.
-        # Publishing it made the browser fall back to localhost:5173 via Docker Desktop/WSL.
         expose:
             - "5173"
         environment:
