@@ -38,3 +38,6 @@ The header “Créer un personnage” still felt slow (~1.5s) after Nginx cached
 
 ## 2026-10-07 — Creation catalog load keeps page chrome
 Catalog fetch still gated step routes, but the provider early-returned a bare `creation-options-status` box on a blank canvas; it now mounts a static `CreationCatalogShell` (background, navbars, step strip without options-dependent steps) and overlays the shared `StatusBox` with “Chargement des éléments de création...” (error + Réessayer use the same shell), matching Home/sheet loading instead of a white screen.
+
+## 2026-10-07 — Nginx image from config snippets
+Catalog cache made loading screens hard to see and a single bind-mounted `default.conf` was awkward to toggle; `web-server` now builds from `docker/nginx` (`conf.d/` + `snippets/`), with `NGINX_CATALOG_CACHE` selecting the cached vs passthrough catalog location at image build time instead of using stock `nginx:latest` plus a host mount.
