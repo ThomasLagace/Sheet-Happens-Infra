@@ -41,3 +41,6 @@ Catalog fetch still gated step routes, but the provider early-returned a bare `c
 
 ## 2026-10-07 — Nginx image from config snippets
 Catalog cache made loading screens hard to see and a single bind-mounted `default.conf` was awkward to toggle; `web-server` now builds from `docker/nginx` (`conf.d/` + `snippets/`), with `NGINX_CATALOG_CACHE` selecting the cached vs passthrough catalog location at image build time instead of using stock `nginx:latest` plus a host mount.
+
+## 2026-10-11 — Favicon served from Vite public
+The tab stayed blank because `index.html` requested `/assets/icon/sheet_happens.ico` while the file lived under `src/`, so Nginx/Vite answered with the SPA HTML document; the icon is now `frontend/public/favicon.ico` (browsers also request that path on their own) and the stock Vite `favicon.svg` was removed so it would not remain the unused public icon.
