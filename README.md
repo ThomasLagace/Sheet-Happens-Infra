@@ -10,7 +10,6 @@ l’API Laravel (Sail) sur le réseau Docker Compose `sail`.
 
 ## Prérequis
 
-- [Node.js](https://nodejs.org/) et npm (hooks Git / assertion `agent/`).
 - `make` et `docker-compose` (ou Docker Compose v2).
 - Sur Windows : scripts `clone-http.ps1` / `clone-ssh.ps1` à la place des
   cibles Make de clone si besoin.
@@ -18,7 +17,6 @@ l’API Laravel (Sail) sur le réseau Docker Compose `sail`.
 ## Installation
 
 ```bash
-npm install
 cp .env.development .env
 ```
 

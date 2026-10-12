@@ -22,8 +22,8 @@ Ce dépôt **n’a pas** de suite `npm run test` / `lint` / `format` de
 produit : la validation locale passe par Compose (`make up` / `make build`).
 
 Après toute addition ou modification de règles/skills sous `agent/`,
-mettre à jour leurs copies dans `.cursor/` et `.claude/`. Avant de considérer une tâche d’infra terminée,
-vérifier que la stack démarre (`make up`) sans erreur évidente sur les
+mettre à jour leurs copies dans `.cursor/` et `.claude/`. Avant de
+considérer une tâche d’infra terminée, vérifier que la stack démarre (`make up`) sans erreur évidente sur les
 services touchés.
 
 ## Langue

@@ -7,7 +7,6 @@ sur ce dépôt.
 ## Mise en place
 
 ```bash
-npm install
 cp .env.development .env
 ./clone-http.ps1          # Windows ; ou make clone-http / make clone-ssh
 make composer-install
