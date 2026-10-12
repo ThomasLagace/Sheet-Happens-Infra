@@ -3,7 +3,19 @@ set -euo pipefail
 
 cd /var/www/html
 
-if [ -f vendor/autoload.php ]; then
+need_install=0
+if [ ! -f vendor/autoload.php ]; then
+    need_install=1
+else
+    case "$(printf "%s" "${APP_ENV:-production}" | tr -d "\"'")" in
+        local|development|testing)
+            # The api-vendor volume is seeded from the image (--no-dev tree).
+            [ -d vendor/phpunit/phpunit ] || need_install=1
+            ;;
+    esac
+fi
+
+if [ "$need_install" = 0 ]; then
     echo "Composer dependencies already present."
 else
     echo "Composer dependencies are missing. Installing..."

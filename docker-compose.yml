@@ -68,6 +68,9 @@ services:
         entrypoint: ["/bin/bash", "/infra/bootstrap.sh"]
         volumes:
             - './backend/:/var/www/html/'
+            # vendor lives in a named volume: thousands of small files read through the
+            # Windows bind mount cost ~14 ms per stat (6-30 s per request).
+            - api-vendor:/var/www/html/vendor
             - './docker/api/bootstrap.sh:/infra/bootstrap.sh:ro'
             - nginx-cache:/var/cache/nginx
         healthcheck:
@@ -140,4 +143,6 @@ volumes:
     frontend-node-modules:
         driver: local
     nginx-cache:
+        driver: local
+    api-vendor:
         driver: local
