@@ -13,7 +13,7 @@ une **copie conforme** de ces documents (pas de lien symbolique).
 | Fichier | Rôle |
 | ------- | ---- |
 | [`scope.mdc`](scope.mdc) | Limites de portée infra + produit (toujours pertinentes) |
-| [`local-stack.mdc`](local-stack.mdc) | Stack locale : Compose, Nginx, Sail, clones `frontend/` / `backend/` |
+| [`local-stack.mdc`](local-stack.mdc) | Stack locale : Compose, Nginx, clones `frontend/` / `backend/` |
 | [`verification.mdc`](verification.mdc) | Vérification des changements d’infra (pas de suite de tests produit ici) |
 | [`ide-code-review/`](ide-code-review/) | Skill de revue in-IDE (complétude, scope, copies `agent/`, angles Security/Architecture/Dataflow/Cleanness) |
 | [`akinator/`](akinator/) | Skill de clarification : questions jusqu’à brief concret ; docs d’abord ; mode sans opérateur (CI) |

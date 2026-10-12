@@ -9,8 +9,7 @@ sur ce dépôt.
 ```bash
 cp .env.development .env
 ./clone-http.ps1          # Windows ; ou make clone-http / make clone-ssh
-make composer-install
-make up
+make up-dev               # crée les .env manquants puis démarre la stack
 ```
 
 `frontend/` et `backend/` sont des clones des dépôts applicatifs (hors Git
