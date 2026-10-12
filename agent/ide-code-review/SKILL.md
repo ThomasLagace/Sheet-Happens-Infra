@@ -11,8 +11,8 @@ description: >-
 # IDE code review
 
 Local-only review of this worktree. Always judge completeness vs inferred
-task, scope of the branch delta, Compose validity, and `agent/` symlink
-architecture. Also apply the operator-selected review angles below. Do not
+task, scope of the branch delta, Compose validity, and `agent/` copies
+being in sync. Also apply the operator-selected review angles below. Do not
 assume a pull request, CI job, or remote review harness.
 
 ## Review angles (ask first)
@@ -69,12 +69,13 @@ Infer silently; only ask if blocked (angles question above is required):
   say Compose validation was not applicable.
 - If `docker compose config` fails to run, report that as one execution
   issue—separate from a failed assertion.
-- Always run the agent symlink assertion on this checkout, even if the delta
-  does not touch `agent/` or tool dotfiles: `npm run check:agent-symlinks`
-  (or `node scripts/check-agent-symlinks.mjs`). A non-zero exit is a blocking
-  issue (quote the failing lines; point at `AGENTS.md` / `docs/agent-symlinks.md`).
-  If the script fails to run, report that as one execution issue—separate from
-  a failed assertion.
+- Always check, even if the delta does not touch `agent/` or tool dotfiles,
+  that copies match their source (`diff`): `agent/<name>.mdc` ↔
+  `.cursor/rules/<name>.mdc` and `.claude/rules/<name>.md`;
+  `agent/<skill>/SKILL.md` ↔ `.cursor/skills/<skill>/SKILL.md` and
+  `.claude/skills/<skill>/SKILL.md`. Any difference or missing copy is a
+  blocking issue (list the files; point at `AGENTS.md`). If the comparison
+  cannot run, report that as one execution issue—separate from a failed check.
 - Do not approve / request-changes language; just list what must be fixed.
 
 ## Output (strict)
@@ -96,7 +97,7 @@ exactly this shape — nothing else:
 No résumé, no praise, no speculative nits, no “consider also…” in the main
 list. Group only if useful: `Missing`, `Out of scope`, `Compose`, `Agent links`,
 `Security`, `Architecture`, `Dataflow`, `Cleanness`, `Blocked` (e.g. Compose
-or `check:agent-symlinks` could not run).
+or the copy comparison could not run).
 
 After the main list, if any unchecked-angle observations exist:
 

@@ -18,24 +18,16 @@ make up
 de ce dépôt). L’API et le frontend sont joints sur le réseau Compose ;
 Nginx écoute sur le port 80.
 
-### Liens symboliques (Windows)
+### Règles et skills IA
 
-Les règles et skills IA partagés sont dans `agent/` ; les configs d’outils
-(dotfiles) y pointent via des **liens symboliques de fichier** (mode Git
-`120000`). Sur Windows, activer le **mode développeur** et
-`git config --global core.symlinks true` avant de cloner (ou réparer après
-coup). Procédure d’ajout et assertion :
-[AGENTS.md](AGENTS.md), détails Windows :
-[docs/agent-symlinks.md](docs/agent-symlinks.md).
-`npm install` active aussi la config Git locale du clone (`core.hooksPath`,
-`core.symlinks=true`) et les hooks qui réparent les symlinks `agent/` si un
-`git add` les a transformés en copies.
+Les règles et skills IA partagés sont dans `agent/` (source de vérité) ;
+chaque outil (`.cursor/`, `.claude/`) en reçoit une **copie** identique.
+Procédure d’ajout : [AGENTS.md](AGENTS.md).
 
 ## Commandes à exécuter avant d'ouvrir une pull request
 
 ```bash
 docker compose config          # la config Compose doit être valide
-npm run check:agent-symlinks   # si agent/ ou des liens d’outils vers agent/ ont changé (sinon recommandé)
 ```
 
 Il n’y a pas de `npm run test` / `lint` / `format` sur ce dépôt. Vérifier
@@ -43,10 +35,9 @@ manuellement que les services touchés démarrent (`make up` / `make build`)
 et que le proxy Nginx se comporte comme prévu pour les chemins concernés
 (`/`, `/api`).
 
-`npm run check:agent-symlinks` doit passer dès que des règles ou skills
-partagés (ou leurs symlinks) sont touchés ; la revue PR automatisée
-l’exécute aussi (voir [AGENTS.md](AGENTS.md) et
-[docs/agent-symlinks.md](docs/agent-symlinks.md)).
+Si des règles ou skills partagés sous `agent/` changent, leurs copies dans
+`.cursor/` et `.claude/` doivent être mises à jour ; la revue PR automatisée
+le vérifie (voir [AGENTS.md](AGENTS.md)).
 
 ## Normes de programmation
 
@@ -88,8 +79,8 @@ En résumé :
 - développer dans une branche `feature/{tacheId}-nom-branche` ou
   `bugfix/...`, jamais directement dans `main` ;
 - ouvrir la pull request vers `main` une fois la stack vérifiée
-  localement (et `npm run check:agent-symlinks` si `agent/` ou les liens
-  d’outils ont changé) ;
+  localement (et copies `.cursor/` / `.claude/` à jour si `agent/` a
+  changé) ;
 - la fusion requiert la validation d'un agent **et** celle d'un humain.
 
 ## Documentation

@@ -33,5 +33,5 @@ Documentation and issues: **French**. Code (identifiers, comments) and commits: 
 
 Before marking infra work done: the touched stack path must start cleanly
 (`make up` / `make build` as relevant) and `docker compose config` must be
-valid. When `agent/` or tool links into it changed: `npm run check:agent-symlinks`
-must pass too.
+valid. When `agent/` changed: its copies under `.cursor/` and `.claude/`
+must be updated too.

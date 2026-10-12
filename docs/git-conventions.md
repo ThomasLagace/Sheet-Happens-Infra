@@ -27,11 +27,8 @@ d'équipe), adaptées à ce dépôt d’orchestration.
 - Un `.gitattributes` doit être maintenu à la racine du projet pour
   uniformiser la gestion des fins de ligne entre Windows et Linux et
   éviter les conflits de commit qui en découlent.
-- Les liens symboliques des configs d’agents vers `agent/` exigent
-  `core.symlinks=true` sur les machines Windows et doivent être commités
-  en mode Git `120000` (pas une copie du contenu ni un fichier texte
-  contenant le chemin). Voir [agent-symlinks.md](agent-symlinks.md) et
-  `npm run check:agent-symlinks`.
+- Les configs d’agents (`.cursor/`, `.claude/`) contiennent des **copies**
+  de `agent/` : toute modification sous `agent/` doit être recopiée.
 
 ## Workflow de tâche
 
@@ -59,9 +56,8 @@ que :
   portée réelle de la fonctionnalité ;
 - `docker compose config` passe localement (voir
   [CONTRIBUTING.md](../CONTRIBUTING.md)) ;
-- si la PR touche `agent/` ou des liens d’outils vers `agent/`,
-  `npm run check:agent-symlinks` passe aussi (voir
-  [AGENTS.md](../AGENTS.md)).
+- si la PR touche `agent/`, les copies sous `.cursor/` et `.claude/` sont à
+  jour (voir [AGENTS.md](../AGENTS.md)).
 
 ## Validation et fusion
 
@@ -69,7 +65,7 @@ Pour être fusionnée dans `main`, une pull request doit obtenir :
 
 - la validation d'un agent (revue automatisée/IA — le prompt CI
   [`.github/prompts/pr-review.md`](../.github/prompts/pr-review.md)
-  exécute notamment `npm run check:agent-symlinks`) ;
+  vérifie notamment que les copies d’agents sont à jour) ;
 - **et** la validation d'un humain, pour s'assurer que l'agent n'a pas
   laissé passer d'erreur.
 

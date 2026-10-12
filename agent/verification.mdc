@@ -16,7 +16,7 @@ Do not add FE/API test runners here; those live in the cloned app repos.
    touched services become healthy / reachable.
 3. If Nginx locations changed: smoke `http://localhost/` (frontend) and
    `http://localhost/api` (API) as applicable.
-4. If `agent/` or tool symlinks changed: `npm run check:agent-symlinks`.
+4. If `agent/` changed: update its copies under `.cursor/` and `.claude/`.
 
 ## What not to do
 

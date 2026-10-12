@@ -2,13 +2,20 @@
 /backend/
 .env
 
-# Cursor: ignore personal/local tooling; keep shared agent links + cli permissions
+# Cursor: ignore personal/local tooling; keep shared agent copies + cli permissions
 /.cursor/*
 !/.cursor/cli.json
 !/.cursor/rules/
 !/.cursor/rules/**
 !/.cursor/skills/
 !/.cursor/skills/**
+
+# Claude: ignore personal/local tooling; keep shared agent copies
+/.claude/*
+!/.claude/rules/
+!/.claude/rules/**
+!/.claude/skills/
+!/.claude/skills/**
 
 /node_modules/
 

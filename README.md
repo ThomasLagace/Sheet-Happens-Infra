@@ -30,11 +30,6 @@ backend :
 make composer-install
 ```
 
-`npm install` configure aussi ce clone Git (`core.hooksPath=.githooks`,
-`core.symlinks=true`) et active le hook pre-commit qui répare les symlinks
-`agent/`. **Lancer `npm install` au moins une fois avant tout commit** — sinon
-ces hooks et réglages ne sont pas en place.
-
 ## Démarrage
 
 ```bash
@@ -55,14 +50,11 @@ make up
 | `make clone-http` / `clone-ssh`| Clone Api → `backend/`, Frontend → `frontend/`.                             |
 | `make composer-install`        | `composer install` dans `backend/` via image Sail PHP.                      |
 | `make migrate-fresh-seed`      | `migrate:fresh --seed` via Sail dans `backend/`.                            |
-| `npm run check:agent-symlinks` | Vérifie que chaque source sous `agent/` a un symlink outil Git valide.      |
-| `npm run fix:agent-symlinks`   | Réécrit l’index si `git add` a transformé des liens `agent/` en copies.   |
 
 ## Structure du projet
 
 ```
 agent/              Règles et skills partagés pour agents IA (source de vérité)
-scripts/            Outils repo (ex. check-agent-symlinks.mjs)
 docker/
   frontend/         Dockerfile du service Vite
   nginx/            Reverse proxy (`/` → frontend, `/api` → laravel.test)
@@ -73,19 +65,14 @@ frontend/           Clone local Sheet-Happens-Frontend (gitignoré)
 backend/            Clone local Sheet-Happens-Api (gitignoré)
 ```
 
-Sur Windows, activer le mode développeur avant de cloner pour que les liens
-des configs d’agents vers `agent/` fonctionnent — détails dans
-[docs/agent-symlinks.md](docs/agent-symlinks.md). Après le clone,
-`npm install` active `core.symlinks=true` et les hooks pour ce dépôt.
-Procédure d’ajout / assertion : [AGENTS.md](AGENTS.md).
+Les configs d’agents (`.cursor/`, `.claude/`) contiennent des copies de
+`agent/`. Procédure d’ajout : [AGENTS.md](AGENTS.md).
 
 ## Documentation du projet
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — mise en place, normes, définition de
   « terminé », processus de pull request.
 - [AGENTS.md](AGENTS.md) — repères pour les agents IA (commandes, procédure
-  règles/skills sous `agent/`, assertion des symlinks).
-- [docs/agent-symlinks.md](docs/agent-symlinks.md) — liens symboliques vers
-  `agent/`, `core.symlinks` (Windows), vérification.
+  règles/skills sous `agent/` et copies vers les outils).
 - [docs/git-conventions.md](docs/git-conventions.md) — modèle de branches
   Git et workflow de tâche.
