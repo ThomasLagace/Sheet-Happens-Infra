@@ -1,0 +1,59 @@
+name: Cursor Code Review
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+    pull-requests: write
+    contents: read
+
+concurrency:
+    group: cursor-code-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+jobs:
+    code-review:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        if: github.event.pull_request.draft == false
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.event.pull_request.head.sha }}
+
+            - name: Install Cursor CLI
+              run: |
+                  curl https://cursor.com/install -fsS | bash
+                  echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+            - name: Perform automated code review
+              timeout-minutes: 15
+              env:
+                  CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+                  GH_TOKEN: ${{ github.token }}
+                  MODEL: composer-2.5
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  REPOSITORY: ${{ github.repository }}
+                  BASE_REF: ${{ github.base_ref }}
+                  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  PR_BODY: ${{ github.event.pull_request.body }}
+              run: |
+                  set -euo pipefail
+                  if [[ -z "${CURSOR_API_KEY:-}" ]]; then
+                    echo "CURSOR_API_KEY is not configured."
+                    exit 1
+                  fi
+                  {
+                    cat .github/prompts/pr-review.md
+                    printf '\n## Context\n'
+                    printf -- '- Repo: %s\n' "$REPOSITORY"
+                    printf -- '- PR: %s\n' "$PR_NUMBER"
+                    printf -- '- Head SHA: %s\n' "$HEAD_SHA"
+                    printf -- '- Base ref: %s\n' "$BASE_REF"
+                    printf -- '- Title: %s\n' "$PR_TITLE"
+                    printf -- '- Body:\n%s\n' "$PR_BODY"
+                  } | cursor-agent --force --model "$MODEL" --output-format=text --print

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": ["Shell(gh)"],
+    "deny": [
+      "Shell(git push)",
+      "Shell(gh pr create)",
+      "Shell(gh:pr merge*)",
+      "Shell(gh:pr close*)",
+      "Shell(gh:pr reopen*)"
+    ]
+  }
+}
