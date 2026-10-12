@@ -1,7 +1,9 @@
 ---
 description: How to verify infra changes — Compose validity, smoke the stack
-globs: docker-compose.yml,docker/**,Makefile
-alwaysApply: false
+paths:
+  - "docker-compose.yml"
+  - "docker/**"
+  - "Makefile"
 ---
 
 # Verification (no app test suite here)

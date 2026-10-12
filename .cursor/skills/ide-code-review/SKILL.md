@@ -73,8 +73,9 @@ Infer silently; only ask if blocked (angles question above is required):
   that copies match their source (`diff`): `agent/<name>.mdc` ↔
   `.cursor/rules/<name>.mdc` and `.claude/rules/<name>.md`;
   `agent/<skill>/SKILL.md` ↔ `.cursor/skills/<skill>/SKILL.md` and
-  `.claude/skills/<skill>/SKILL.md`. Any difference or missing copy is a
-  blocking issue (list the files; point at `AGENTS.md`). If the comparison
+  `.claude/skills/<skill>/SKILL.md`. For `.claude/rules/*.md`, ignore the
+  frontmatter (`paths:` replaces `globs`/`alwaysApply`) and compare the body
+  only. Any difference or missing copy is a blocking issue (list the files; point at `AGENTS.md`). If the comparison
   cannot run, report that as one execution issue—separate from a failed check.
 - Do not approve / request-changes language; just list what must be fixed.
 

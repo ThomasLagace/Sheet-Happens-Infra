@@ -1,6 +1,5 @@
 ---
 description: Product and infra scope limits — do not expand without explicit request
-alwaysApply: true
 ---
 
 # Scope limits

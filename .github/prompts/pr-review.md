@@ -31,8 +31,9 @@ Compose check.
   that the copies are identical to their source: `agent/<name>.mdc` ↔
   `.cursor/rules/<name>.mdc` and `.claude/rules/<name>.md`;
   `agent/<skill>/SKILL.md` ↔ `.cursor/skills/<skill>/SKILL.md` and
-  `.claude/skills/<skill>/SKILL.md` (use `diff`). Any difference or missing
-  copy is a blocking finding. If the comparison cannot run, report that as an
+  `.claude/skills/<skill>/SKILL.md` (use `diff`). For `.claude/rules/*.md`, ignore the
+  frontmatter (Claude Code uses `paths:` instead of `globs`/`alwaysApply`) and
+  compare the body only. Any difference or missing copy is a blocking finding. If the comparison cannot run, report that as an
   execution problem, separate from a failed check.
 - Do not approve, request changes, or dismiss reviews.
 

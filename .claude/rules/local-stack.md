@@ -1,7 +1,12 @@
 ---
 description: Local Docker stack — Compose services, Nginx proxy, clones
-globs: docker-compose.yml,docker/**,Makefile,clone-*.ps1,.env.example,.env.development
-alwaysApply: false
+paths:
+  - "docker-compose.yml"
+  - "docker/**"
+  - "Makefile"
+  - "clone-*.ps1"
+  - ".env.example"
+  - ".env.development"
 ---
 
 # Local stack (Compose + Nginx)

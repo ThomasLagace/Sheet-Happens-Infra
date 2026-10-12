@@ -51,7 +51,7 @@ et les commits sont écrit en **anglais**.
   `clone-http`, `clone-ssh`, `migrate-fresh-seed`, `smoke`,
   `smoke-from-scratch`, `php`.
 - `ARCHIVE.md` — journal des changements du projet, à lire avant de
-  planifier un nouveau travail (voir le skill `keep-track`).
+  planifier un nouveau travail.
 - `clone-http.ps1` / `clone-ssh.ps1` — clones Windows équivalents aux
   cibles Make.
 - `.env.development` / `.env.example` — modèle d’environnement
@@ -85,7 +85,9 @@ vérité. Chaque outil IA en reçoit une **copie** dans son dossier
 3. Documenter l’entrée dans [`agent/README.md`](agent/README.md).
 
 Les copies doivent rester identiques à `agent/` : ne jamais éditer une copie
-seule. Les skills **personnels / natifs** d’un outil (sans pendant sous
+seule. Seule exception : le frontmatter des règles `.claude/rules/*.md`, où
+`paths:` (liste de motifs) remplace `globs:` et `alwaysApply:` de Cursor ; le
+corps reste identique. Les skills **personnels / natifs** d’un outil (sans pendant sous
 `agent/`) restent hors de cette procédure.
 
 La revue vérifie que les copies correspondent à `agent/` : skill
