@@ -55,4 +55,6 @@ fi
 # Use the app tree entrypoint (bind-mounted in Compose), not the copy baked
 # at /entrypoint.sh in the image — otherwise local edits to backend/entrypoint.sh
 # never run.
-exec /var/www/html/entrypoint.sh
+# bash, not a direct exec: the bind-mounted script is often mode 644, and the
+# image chmod only applies to the copy at /entrypoint.sh.
+exec bash /var/www/html/entrypoint.sh

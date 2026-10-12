@@ -32,3 +32,15 @@ Needed a repeatable proof that Compose boots clean after volume wipe; added `scr
 
 ## 2026-09-30 — make up-dev ensures .env files
 Dev onboarding still required a manual `.env` copy; added `scripts/ensure-env.ps1` / `.sh` (infra from `.env.development`, frontend/backend from `.env.example`, never overwrite) and `make up-dev` / `make ensure-env` so one command prepares env then runs the same `docker compose up -d` as `make up`. The Makefile recipe must call PowerShell directly: Windows `make` uses `cmd.exe`, so a bash-style `command -v` check failed with `-v was unexpected at this time`.
+
+## 2026-10-02 — Header create uses SPA navigate
+The header “Créer un personnage” still felt slow (~1.5s) after Nginx cached the catalog because it was a hard `<a href>` that rebooted the SPA and waited on `/api/user` before `CreationOptionsProvider` could fetch; `Navbar.jsx` now uses the same `navigate()` path as Accueil and the empty character card (and the creation mobile brand likewise goes home via `navigate('/')`).
+
+## 2026-10-07 — Creation catalog load keeps page chrome
+Catalog fetch still gated step routes, but the provider early-returned a bare `creation-options-status` box on a blank canvas; it now mounts a static `CreationCatalogShell` (background, navbars, step strip without options-dependent steps) and overlays the shared `StatusBox` with “Chargement des éléments de création...” (error + Réessayer use the same shell), matching Home/sheet loading instead of a white screen.
+
+## 2026-10-07 — Nginx image from config snippets
+Catalog cache made loading screens hard to see and a single bind-mounted `default.conf` was awkward to toggle; `web-server` now builds from `docker/nginx` (`conf.d/` + `snippets/`), with `NGINX_CATALOG_CACHE` selecting the cached vs passthrough catalog location at image build time instead of using stock `nginx:latest` plus a host mount.
+
+## 2026-10-11 — Favicon served from Vite public
+The tab stayed blank because `index.html` requested `/assets/icon/sheet_happens.ico` while the file lived under `src/`, so Nginx/Vite answered with the SPA HTML document; the icon is now `frontend/public/favicon.ico` (browsers also request that path on their own) and the stock Vite `favicon.svg` was removed so it would not remain the unused public icon.
