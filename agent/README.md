@@ -1,10 +1,11 @@
 # Documentation partagée pour agents IA
 
 Ce dossier est la **source de vérité** des règles métier, skills et workflows
-destinés à tout agent IA qui travaille sur ce dépôt. Les fichiers de
-configuration propres à un outil (dossiers ou fichiers « dotfile » :
-`.cursor/`, `.claude/`, `.github/`, `AGENTS.md`, etc.) reçoivent
-une **copie conforme** de ces documents (pas de lien symbolique).
+destinés à tout agent IA qui travaille sur ce dépôt. Les dossiers de
+configuration des outils (`.cursor/`, `.claude/`) reçoivent une **copie
+conforme** de ces documents (pas de lien symbolique). Les fichiers d’entrée
+(`AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`) ne sont pas
+des copies : ils renvoient ici.
 
 Éditer ici d’abord, puis recopier vers les dossiers d’outils.
 
