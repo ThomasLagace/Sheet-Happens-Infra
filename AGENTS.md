@@ -26,7 +26,7 @@ The infrastructure is expected to be started in this exact order:
 All traffic between the containers is meant to pass through the Nginx service named `web-server` in `docker-compose.yml`.
 
 - `web-server` is the public entry point and listens on port `80`.
-- `docker/nginx/default.conf` defines the reverse-proxy rules.
+- `docker/nginx/` builds the `web-server` image: `conf.d/` + `snippets/` (catalog cache is selected at image build via `NGINX_CATALOG_CACHE`, default `1`). `make up` and `docker compose up -d` do not rebuild an existing image, so changing that value does nothing until `docker compose up -d --build web-server` or `make build`.
 - `/` is routed to the Vite + React frontend service.
 - `/api` is routed to the Laravel backend service.
 - `/sanctum` is also routed to the Laravel backend so the SPA CSRF cookie endpoint works correctly.
